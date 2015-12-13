@@ -23,7 +23,9 @@ library
                        text,
                        attoparsec,
                        aeson-pretty,
-                       http-types
+                       http-types,
+                       transformers,
+                       case-insensitive
   default-language:    Haskell2010
 
 executable magister-exe
