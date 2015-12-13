@@ -1,5 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Lib (magisterLogin, someFunc) where
+module Lib {-(magisterLogin, toLogin)-} where
 
 import Network.HTTP.Conduit
 import qualified Data.ByteString.Lazy as BL
@@ -18,30 +18,15 @@ import Control.Error.Util
 
 type MyError = String
 
-data Login = Login {
-           gebruikersnaam :: String,
-           wachtwoord :: String,
-           ingelogdBlijven :: Bool
-} deriving (Show)
-
-instance ToJSON Login where
-        toJSON (Login gebruikersnaam wachtwoord ingelogdBlijven) =
-            object ["Gebruikersnaam" .= gebruikersnaam
-                   ,"Wachtwoord" .= wachtwoord
-                   ,"IngelogdBlijven" .= ingelogdBlijven]
-
 school :: String
 school = "ichthuslyceum"
 
 apiUrl :: String
 apiUrl = "https://" ++ school ++ ".magister.net/api/"
 
-someFunc :: IO ()
-someFunc = Prelude.putStrLn "someFunc"
-
-toLogin :: String -> String -> RequestBody
-toLogin gebruikersnaam wachtwoord = RequestBodyLBS $ encode Login 
-    { gebruikersnaam=gebruikersnaam, wachtwoord=wachtwoord, ingelogdBlijven=True}
+toLogin :: BL.ByteString -> BL.ByteString -> RequestBody
+toLogin naam ww = RequestBodyLBS $ "{ Gebruikersnaam:\"" `BL.append` naam `BL.append` 
+    "\", Wachtwoord:\"" `BL.append` ww `BL.append` "\", IngelogdBlijven:\"true\"}"
 
 postHttp :: RequestBody -> Maybe CookieJar -> String -> IO (Either MyError (Response BL.ByteString))
 postHttp body = myHttp methodPost (Just [(mk "Content-Type", "application/json;charset=UTF-8")]) (Just body)
