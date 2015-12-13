@@ -42,16 +42,6 @@ apiUrl = "https://" ++ school ++ ".magister.net/api/"
 someFunc :: IO ()
 someFunc = Prelude.putStrLn "someFunc"
 
-{-
-putHttpJson :: String -> IO ()
-putHttpJson url = BLIO.putStrLn . prettifyJSON =<< simpleHttp url
-
-prettifyJSON :: BL.ByteString -> BL.ByteString
-prettifyJSON = encodePretty . fromResult . AB.parse json . BL.toStrict
-
-fromResult :: AB.Result a -> a
-fromResult = fromJust . AB.maybeResult
--}
 toLogin :: String -> String -> RequestBody
 toLogin gebruikersnaam wachtwoord = RequestBodyLBS $ encode Login 
     { gebruikersnaam=gebruikersnaam, wachtwoord=wachtwoord, ingelogdBlijven=True}
@@ -62,9 +52,6 @@ postHttp body = myHttp methodPost (Just [(mk "Content-Type", "application/json;c
 magisterLogin :: RequestBody -> IO (Either MyError CookieJar)
 magisterLogin login = liftM (fmap responseCookieJar) 
     (getCookieJar (apiUrl ++ "sessies/huidige") >>= (\jar -> postHttp login (hush jar) (apiUrl ++ "sessies")))
-
---getHttp :: Maybe CookieJar -> String -> IO (Either MyError (Response BL.ByteString))
---getHttp = myHttp methodGet Nothing Nothing
 
 getCookieJar :: String -> IO (Either MyError CookieJar)
 getCookieJar url = fmap responseCookieJar <$> myHttp methodGet mempty mempty (Just $ createCookieJar mempty) url
