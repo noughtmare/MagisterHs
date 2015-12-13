@@ -3,7 +3,7 @@ version:             0.1.0.0
 synopsis:            Initial project template from stack
 description:         Please see README.md
 homepage:            http://github.com/githubuser/magister#readme
-license:             GPLv3
+license:             GPL-3
 license-file:        LICENSE
 author:              Author name here
 maintainer:          example@example.com
@@ -25,7 +25,8 @@ library
                        aeson-pretty,
                        http-types,
                        transformers,
-                       case-insensitive
+                       case-insensitive,
+                       errors
   default-language:    Haskell2010
 
 executable magister-exe

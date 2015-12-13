@@ -1,18 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
-module Lib (magisterLogin, someFunc) where
+module Lib where
 
 import Network.HTTP.Conduit
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString as B
---import Data.Text.Encoding 
+import Data.Text.Encoding 
 import qualified Data.Text as T
 import qualified Data.Attoparsec.ByteString as AB
 import Data.Aeson
---import Data.Aeson.Encode.Pretty
+import Data.Aeson.Encode.Pretty
 import qualified Data.ByteString.Lazy.Char8 as BLIO
 import Data.Maybe
 import Network.HTTP.Types.Method
---import Control.Monad.IO.Class
+import GHC.Generics
+import Control.Monad.IO.Class
 import Data.CaseInsensitive
 import Control.Monad
 import Control.Applicative
@@ -42,7 +43,6 @@ apiUrl = "https://" ++ school ++ ".magister.net/api/"
 someFunc :: IO ()
 someFunc = Prelude.putStrLn "someFunc"
 
-{-
 putHttpJson :: String -> IO ()
 putHttpJson url = BLIO.putStrLn . prettifyJSON =<< simpleHttp url
 
@@ -51,10 +51,11 @@ prettifyJSON = encodePretty . fromResult . AB.parse json . BL.toStrict
 
 fromResult :: AB.Result a -> a
 fromResult = fromJust . AB.maybeResult
--}
+
 toLogin :: String -> String -> RequestBody
-toLogin gebruikersnaam wachtwoord = RequestBodyLBS $ encode Login 
-    { gebruikersnaam=gebruikersnaam, wachtwoord=wachtwoord, ingelogdBlijven=True}
+toLogin gebruikersnaam wachtwoord = RequestBodyLBS $ encode Login { gebruikersnaam=gebruikersnaam
+                                                  , wachtwoord=wachtwoord
+                                                  , ingelogdBlijven=True}
 
 postHttp :: RequestBody -> Maybe CookieJar -> String -> IO (Either MyError (Response BL.ByteString))
 postHttp body = myHttp methodPost (Just [(mk "Content-Type", "application/json;charset=UTF-8")]) (Just body)
@@ -63,11 +64,20 @@ magisterLogin :: RequestBody -> IO (Either MyError CookieJar)
 magisterLogin login = liftM (fmap responseCookieJar) 
     (getCookieJar (apiUrl ++ "sessies/huidige") >>= (\jar -> postHttp login (hush jar) (apiUrl ++ "sessies")))
 
---getHttp :: Maybe CookieJar -> String -> IO (Either MyError (Response BL.ByteString))
---getHttp = myHttp methodGet Nothing Nothing
+getHttp :: Maybe CookieJar -> String -> IO (Either MyError (Response BL.ByteString))
+getHttp = myHttp methodGet Nothing Nothing
 
 getCookieJar :: String -> IO (Either MyError CookieJar)
-getCookieJar url = fmap responseCookieJar <$> myHttp methodGet mempty mempty (Just $ createCookieJar mempty) url
+getCookieJar url = fmap responseCookieJar <$> myHttp methodGet mempty mempty mempty url
+        {-case parseUrl url of
+            Nothing -> do 
+                putStrLn "Invalid url"
+                return Nothing
+            Just req -> do
+                man <- newManager tlsManagerSettings
+                let reqCookieJar = req { method = methodGet }
+                Just . responseCookieJar <$> httpLbs reqCookieJar man
+-}
 
 myHttp :: Method 
        -> Maybe RequestHeaders
