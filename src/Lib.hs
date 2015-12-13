@@ -4,15 +4,12 @@ module Lib (magisterLogin, someFunc) where
 import Network.HTTP.Conduit
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString as B
---import Data.Text.Encoding 
 import qualified Data.Text as T
 import qualified Data.Attoparsec.ByteString as AB
 import Data.Aeson
---import Data.Aeson.Encode.Pretty
 import qualified Data.ByteString.Lazy.Char8 as BLIO
 import Data.Maybe
 import Network.HTTP.Types.Method
---import Control.Monad.IO.Class
 import Data.CaseInsensitive
 import Control.Monad
 import Control.Applicative
