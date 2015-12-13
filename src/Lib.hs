@@ -7,6 +7,7 @@ import qualified Data.ByteString as B
 import qualified Data.Text as T
 import qualified Data.Attoparsec.ByteString as AB
 import Data.Aeson
+import Data.Aeson.Encode.Pretty
 import qualified Data.ByteString.Lazy.Char8 as BLIO
 import Data.Maybe
 import Network.HTTP.Types.Method
@@ -17,6 +18,10 @@ import Network.HTTP.Types.Header
 import Control.Error.Util
 
 type MyError = String
+
+
+prettifyJSON :: BL.ByteString -> BL.ByteString
+prettifyJSON input = encodePretty . fromMaybe "" . AB.maybeResult . AB.parse json $ BL.toStrict input
 
 school :: String
 school = "ichthuslyceum"
