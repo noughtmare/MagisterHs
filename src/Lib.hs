@@ -19,9 +19,8 @@ import Control.Error.Util
 
 type MyError = String
 
-
 prettifyJSON :: BL.ByteString -> BL.ByteString
-prettifyJSON input = encodePretty . fromMaybe "" . AB.maybeResult . AB.parse json $ BL.toStrict input
+prettifyJSON = encodePretty . fromMaybe "" . AB.maybeResult . AB.parse json . BL.toStrict
 
 school :: String
 school = "ichthuslyceum"
@@ -36,12 +35,15 @@ toLogin naam ww = RequestBodyLBS $ "{ Gebruikersnaam:\"" `BL.append` naam `BL.ap
 postHttp :: RequestBody -> Maybe CookieJar -> String -> IO (Either MyError (Response BL.ByteString))
 postHttp body = myHttp methodPost (Just [(mk "Content-Type", "application/json;charset=UTF-8")]) (Just body)
 
+getHttp :: Maybe CookieJar -> String -> IO (Either MyError (Response BL.ByteString))
+getHttp = myHttp methodGet Nothing Nothing
+
 magisterLogin :: RequestBody -> IO (Either MyError CookieJar)
 magisterLogin login = liftM (fmap responseCookieJar) 
     (getCookieJar (apiUrl ++ "sessies/huidige") >>= (\jar -> postHttp login (hush jar) (apiUrl ++ "sessies")))
 
 getCookieJar :: String -> IO (Either MyError CookieJar)
-getCookieJar url = fmap responseCookieJar <$> myHttp methodGet mempty mempty (Just $ createCookieJar mempty) url
+getCookieJar = (fmap . fmap) responseCookieJar . getHttp (Just $ createCookieJar mempty)
 
 myHttp :: Method 
        -> Maybe RequestHeaders
@@ -50,12 +52,11 @@ myHttp :: Method
        -> String  
        -> IO (Either MyError (Response BL.ByteString))
 myHttp method headers body jar url = case parseUrl url of
-        Nothing -> return . Left $ "Invalid url"
-        Just req -> do
+        Left err -> return . Left . show $ err
+        Right req -> do
             man <- newManager tlsManagerSettings
             let req' = req { method = method
                            , requestHeaders = fromMaybe mempty headers
                            , requestBody = fromMaybe mempty body
                            , cookieJar = jar }
-            liftM Right $ httpLbs req' man
-
+            Right <$> httpLbs req' man
