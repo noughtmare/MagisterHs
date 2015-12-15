@@ -39,6 +39,8 @@ executable magister-exe
                      , bytestring
                      , http-conduit
                      , haskeline
+                     , lens-aeson
+                     , lens-family
   default-language:    Haskell2010
 
 test-suite magister-test
